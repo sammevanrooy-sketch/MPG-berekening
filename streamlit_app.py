@@ -219,7 +219,7 @@ with kpi_col1:
     if total_mki == 0.0:
         st.info("Geen actieve mapping gekoppeld.")
     elif mpg_score <= 0.5:
-        st.success("Uitstekend (BENG compliant)")
+        st.success("Uitstekend (hele lage MPG)")
     elif mpg_score <= 0.8:
         st.warning("Voldoet aan bouwbesluit")
     else:
