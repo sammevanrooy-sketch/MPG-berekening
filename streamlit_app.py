@@ -21,16 +21,26 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 1. Default Mock MKI Database (NMD Estimates in NL)
+# 1. Default Mock MKI Database (Updated with your specified placeholders)
 MOCK_MKI_DATABASE = [
-    {"id": "beton", "label": "Constructiebeton (C30/37)", "mki_m3": 15.50, "mki_m2": 0.0, "unit": "m³"},
-    {"id": "baksteen", "label": "Metselwerk baksteen gevel", "mki_m3": 45.00, "mki_m2": 0.0, "unit": "m³"},
-    {"id": "glas", "label": "Isolerend HR++ glas (dubbel)", "mki_m3": 0.0, "mki_m2": 6.20, "unit": "m²"},
-    {"id": "hout_kozijn", "label": "Hout (Naaldhout / Lariks)", "mki_m3": -25.00, "mki_m2": 0.0, "unit": "m³"},
-    {"id": "gips", "label": "Gipsplaten (binnenwanden)", "mki_m3": 0.0, "mki_m2": 1.80, "unit": "m²"},
-    {"id": "isolatie_minerale_wol", "label": "Minerale wol isolatiedeken", "mki_m3": 12.00, "mki_m2": 0.0, "unit": "m³"},
-    {"id": "cement", "label": "Dekvloer zandcement", "mki_m3": 18.20, "mki_m2": 0.0, "unit": "m³"},
-    {"id": "staal", "label": "Staalconstructieprofielen S235", "mki_m3": 145.00, "mki_m2": 0.0, "unit": "m³"}
+    {"id": "beton", "label": "Beton (Algemeen)", "mki_m3": 50.00, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "hout", "label": "Hout (Massief)", "mki_m3": 65.00, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "hsb", "label": "Houtskeletbouw (HSB-elementen)", "mki_m3": 0.0, "mki_m2": 6.50, "unit": "m²"},
+    {"id": "staal", "label": "Staal", "mki_m3": 3250.00, "mki_m2": 0.0, "unit": "m³"}, # Aangepast naar realistische m3-waarde op basis van je invoer
+    {"id": "zandcement", "label": "Zandcement (Dekvloer)", "mki_m3": 2.80, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "kalkzandsteen", "label": "Kalkzandsteen (KZS)", "mki_m3": 3.50, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "betonvloer", "label": "Betonvloer", "mki_m3": 0.0, "mki_m2": 30.00, "unit": "m²"},
+    {"id": "isolatie", "label": "Isolatie", "mki_m3": 4.00, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "metselwerk", "label": "Metselwerk", "mki_m3": 5.00, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "multiplex", "label": "Multiplex", "mki_m3": 1.00, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "gips", "label": "Gips (Gipsplaten)", "mki_m3": 0.0, "mki_m2": 1.10, "unit": "m²"},
+    {"id": "mdf", "label": "MDF", "mki_m3": 0.60, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "glas", "label": "Glas", "mki_m3": 0.0, "mki_m2": 16.10, "unit": "m²"},
+    {"id": "aluminium", "label": "Aluminium", "mki_m3": 6500.00, "mki_m2": 0.0, "unit": "m³"}, # Omgezet naar m3
+    {"id": "toilet_wc", "label": "Toilet / WC", "mki_m3": 0.0, "mki_m2": 14.50, "unit": "m²"}, # Als oppervlakte of forfait
+    {"id": "natuursteen", "label": "Natuursteen", "mki_m3": 9.50, "mki_m2": 0.0, "unit": "m³"},
+    {"id": "daktrim", "label": "Daktrim", "mki_m3": 0.0, "mki_m2": 1.95, "unit": "m²"}, # Per m1 gesimuleerd als m2
+    {"id": "kozijn", "label": "Kozijn", "mki_m3": 5.80, "mki_m2": 0.0, "unit": "m³"}
 ]
 
 # Create helper maps for speedy lookups
@@ -38,17 +48,27 @@ MKI_LOOKUP = {item["id"]: item for item in MOCK_MKI_DATABASE}
 LABELS_TO_ID = {item["label"]: item["id"] for item in MOCK_MKI_DATABASE}
 LABEL_LIST = ["-- Kies categorie --"] + [item["label"] for item in MOCK_MKI_DATABASE]
 
-# 2. Local fallback rule-based auto-matcher
+# 2. Local fallback rule-based auto-matcher (Updated for new placeholders)
 def auto_match_material(name):
     lower = name.lower()
+    if any(x in lower for x in ['kzs', 'kalkzand', 'kalkzandsteen']): return 'kalkzandsteen'
+    if any(x in lower for x in ['hsb', 'skeletbouw']): return 'hsb'
+    if any(x in lower for x in ['betonvloer']): return 'betonvloer'
     if any(x in lower for x in ['beton', 'concrete']): return 'beton'
     if any(x in lower for x in ['glas', 'glass', 'glazing']): return 'glas'
-    if any(x in lower for x in ['hout', 'wood', 'timber', 'kozijn']): return 'hout_kozijn'
+    if any(x in lower for x in ['multiplex', 'plywood']): return 'multiplex'
+    if any(x in lower for x in ['mdf']): return 'mdf'
+    if any(x in lower for x in ['hout', 'wood', 'timber']): return 'hout'
     if any(x in lower for x in ['gips', 'drywall', 'plaster']): return 'gips'
-    if any(x in lower for x in ['isolatie', 'wool', 'isol']): return 'isolatie_minerale_wol'
-    if any(x in lower for x in ['cement', 'dekvloer']): return 'cement'
+    if any(x in lower for x in ['isolatie', 'wool', 'isol']): return 'isolatie'
+    if any(x in lower for x in ['cement', 'dekvloer', 'zandcement']): return 'zandcement'
     if any(x in lower for x in ['staal', 'steel', 'structure']): return 'staal'
-    if any(x in lower for x in ['brick', 'steen', 'metsel']): return 'baksteen'
+    if any(x in lower for x in ['brick', 'steen', 'metsel', 'metselwerk']): return 'metselwerk'
+    if any(x in lower for x in ['aluminium', 'alu']): return 'aluminium'
+    if any(x in lower for x in ['toilet', 'wc', 'sanitair']): return 'toilet_wc'
+    if any(x in lower for x in ['natuursteen']): return 'natuursteen'
+    if any(x in lower for x in ['daktrim']): return 'daktrim'
+    if any(x in lower for x in ['kozijn', 'frame']): return 'kozijn'
     return ""
 
 # 3. Gemini AI Automapping caller
