@@ -218,9 +218,9 @@ with kpi_col1:
     st.metric(label="MPG Score (€/m² BVO·jaar)", value=f"{mpg_score:.3f}")
     if total_mki == 0.0:
         st.info("Geen actieve mapping gekoppeld.")
-    elif mpg_score <= 0.5:
+    elif mpg_score <= 0.9:
         st.success("Uitstekend (hele lage MPG)")
-    elif mpg_score <= 0.8:
+    elif mpg_score <= 1.6:
         st.warning("Voldoet aan bouwbesluit")
     else:
         st.error("Te hoog (Aandacht vereist!)")
